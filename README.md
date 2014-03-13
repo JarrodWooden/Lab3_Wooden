@@ -26,4 +26,8 @@ Schematic can be seen below:
 
 I recieved full points for the basic functionality for the moore and mealy machine: Required Funtionality 40 points
 
+Captain Silva Checked me off for the More Floors Functionality
+
+Captain Silva Checked me off for the Change Inputs Functionality
+
 
