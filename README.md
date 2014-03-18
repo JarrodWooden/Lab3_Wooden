@@ -249,5 +249,28 @@ Next State Logic:
     else next_light_state <= light1; 
     end if; 
     ```
+  So if `Up_Down` is one and `Stop` is zero it will move to the next light, if `Up_Down` is zero is will move to the 
+  opposite light.
   
+  If stop is switched than it will stay with that current light lit.
+  
+  When it hits the bottom light and the elevator has not reached the bottom floor it will jump back up to the top light
+  and move all the way back down the lights.
+  
+  If the elevator has reached the bottom or top floor the moving lights will stop on the bottom or top light
+  respectively
+  
+Memory:
+  
+  The reset button is synchronus and the next light change will be on the rising edge of the clock.
+  
+Output:
+  
+  The output is an 8 bit `std_logic_vector` that will make a one for whichever LED that needs to be lit up for whichever
+  current light that the Moving Lights machine is on.
+  
+#The End
+
+
+#Have a Great Air Force Day
 
