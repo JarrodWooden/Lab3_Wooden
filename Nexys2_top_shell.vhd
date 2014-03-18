@@ -78,6 +78,21 @@ architecture Behavioral of Nexys2_top_shell is
 		clockbus : OUT std_logic_vector(26 downto 0)
 		);
 	END COMPONENT;
+	
+---------------------------------------------------------------------------------------
+--Prime Numbers Components for B-Functionality
+---------------------------------------------------------------------------------------	
+	
+	COMPONENT Prime_Numbers
+	PORT(
+		clk : IN std_logic;
+		reset : IN std_logic;
+		stop : IN std_logic;
+		up_down : IN std_logic;          
+		floor_digO : OUT std_logic_vector(3 downto 0);
+		floor_digT : OUT std_logic_vector(3 downto 0)
+		);
+	END COMPONENT;
 
 -------------------------------------------------------------------------------------
 --Below are declarations for signals that wire-up this top-level module.
@@ -92,20 +107,77 @@ signal ClockBus_sig : STD_LOGIC_VECTOR (26 downto 0);
 --Insert your design's component declaration below	
 --------------------------------------------------------------------------------------
 
+--Moore elevator Machine
+	COMPONENT MooreElevatorController_Shell
+	PORT(
+		clk : IN std_logic;
+		reset : IN std_logic;
+		stop : IN std_logic;
+		up_down : IN std_logic;          
+		floor : OUT std_logic_vector(3 downto 0)
+		);
+	END COMPONENT;
+
+--Mealy evevator machine
+	COMPONENT MealyElevatorController_Shell
+	PORT(
+		clk : IN std_logic;
+		reset : IN std_logic;
+		stop : IN std_logic;
+		up_down : IN std_logic;          
+		floor : OUT std_logic_vector(3 downto 0);
+		nextfloor : OUT std_logic_vector(3 downto 0)
+		);
+	END COMPONENT;
+	
+--Change input components
+	COMPONENT Change_Inputs
+	PORT(
+		clk : IN std_logic;
+		reset : IN std_logic;
+		input : IN std_logic_vector(3 downto 0);          
+		floor : OUT std_logic_vector(3 downto 0)
+		);
+	END COMPONENT;
+	
+--Light Show Component that will work in coordination with "Prime-Numbers" Module
+	COMPONENT LED_Lights
+	PORT(
+		Up_Down : IN std_logic;
+		Stop : IN std_logic;
+		clk : IN std_logic;
+		reset : IN std_logic; 
+		wireLSB : IN std_logic_vector(3 downto 0);
+		wireMSB : IN std_logic_vector(3 downto 0); 		
+		Output_LED : OUT std_logic_vector(7 downto 0)
+		);
+	END COMPONENT;
 
 
 --------------------------------------------------------------------------------------
 --Insert any required signal declarations below
 --------------------------------------------------------------------------------------
 
+--signal moore_floor : std_logic_vector(3 downto 0);
+--signal mealy_floor : std_logic_vector(3 downto 0);
+--signal mealy_next_floor : std_logic_vector(3 downto 0);
 
+--signal floor_out : std_logic_vector(3 downto 0);
+--signal switch_four: std_logic_vector(3 downto 0);
+--signal switch_others: std_logic_vector(3 downto 0);
+
+signal prime_floor1: std_logic_vector(3 downto 0);
+signal prime_floor2: std_logic_vector(3 downto 0);
 
 begin
+
+--switch_four <= switch(3 downto 0);
+--switch_others <= switch(7 downto 4);
 
 ----------------------------
 --code below tests the LEDs:
 ----------------------------
-LED <= CLOCKBUS_SIG(26 DOWNTO 19);
+--LED <= CLOCKBUS_SIG(26 DOWNTO 19);
 
 --------------------------------------------------------------------------------------------	
 --This code instantiates the Clock Divider. Reference the Clock Divider Module for more info
@@ -125,10 +197,10 @@ LED <= CLOCKBUS_SIG(26 DOWNTO 19);
 --		  Example: if you are not using 7-seg display #3 set nibble3 to "0000"
 --------------------------------------------------------------------------------------
 
-nibble0 <= 
-nibble1 <= 
-nibble2 <= 
-nibble3 <= 
+nibble0 <= prime_floor1;
+nibble1 <= prime_floor2;
+nibble2 <= "0000";
+nibble3 <= "0000";
 
 --This code converts a nibble to a value that can be displayed on 7-segment display #0
 	sseg0: nibble_to_sseg PORT MAP(
@@ -169,9 +241,54 @@ nibble3 <=
 	);
 
 -----------------------------------------------------------------------------
---Instantiate the design you with to implement below and start wiring it up!:
+--Instantiate the design you wish to implement below and start wiring it up!:
 -----------------------------------------------------------------------------
 
+----instance of the moore elevator
+--	moore_Controller: MooreElevatorController_Shell PORT MAP(
+--		clk => ClockBus_sig(25),
+--		reset => btn(3),
+--		stop => switch(0),
+--		up_down => switch(1),
+--		floor => moore_floor
+--	);
+--
+----instance of the mealy elevator
+--	mealy_Controller: MealyElevatorController_Shell PORT MAP(
+--		clk => ClockBus_sig(25),
+--		reset => btn(2),
+--		stop => switch(2),
+--		up_down => switch(3),
+--		floor => mealy_floor,
+--		nextfloor => mealy_next_floor
+--	);
 
+
+	Inst_Prime_Numbers: Prime_Numbers PORT MAP(
+		clk => ClockBus_sig(25),
+		reset => btn(3),
+		stop => switch(0),
+		up_down => switch(1),
+		floor_digO => prime_floor1,
+		floor_digT => prime_floor2
+	);
+
+	Inst_LED_Lights: LED_Lights PORT MAP(
+		Up_Down => switch(1),
+		Stop => switch(0),
+		clk => ClockBus_sig(20),
+		reset => btn(2),
+		wireLSB => prime_floor1,
+		wireMSB => prime_floor2,
+		Output_LED => LED
+	);
+
+--	Inst_Change_Inputs: Change_Inputs PORT MAP(
+--		clk => ClockBus_sig(25),
+--		reset => btn(3),
+--		input => switch_four,
+--		floor => floor_out
+--	);
+ 
 end Behavioral;
 
